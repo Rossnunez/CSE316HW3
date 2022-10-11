@@ -21,14 +21,25 @@ const api = axios.create({
 // WORK, AND SOME REQUIRE DATA, WHICH WE CALL THE payload, FOR WHEN
 // WE NEED TO PUT THINGS INTO THE DATABASE OR IF WE HAVE SOME
 // CUSTOM FILTERS FOR QUERIES
+//WE NEED A CREATE REQUEST, USE POST REQUEST FOR CREATING
+//WE NEED A DELETE REQUEST
+//WERE MISSING A PUT FOR EDITNG OR UPDATING A LIST
+//SOME OF THE THINGS WERE MISSING THE SERVERSIDE TELLS US HOW IT WORKS AS A LIL HINT
+//MISSING 3 REQUEST TYPES ON THE CLIENT SIDE, WRITE ALL THE CODE FOR THE REACT STUFF
+//WERE GONBNA USE AXIOS BUILT ON TOP OF AJAX, ITS A PROMISE BASED LIBRARY, SO YOU CAN MAKE FUNC CALLS TO DO SOMEONE IN THE BACKEND SERVR
+//FIRST SEND THE CHANGE TO THE SERVER ALWAYS, AND ONLY WHEN THE SEVRER IS DONE DOING THAT, DO WE UPDATE THE STATE LOCALLY
+//user interacts with react comp, we call a func in the store, and then we send that req to the server and we either get back yay it scucc and we update the state or nay and we return an error
+//
 export const getAllPlaylists = () => api.get(`/playlists`)
 export const getPlaylistPairs = () => api.get('playlistpairs')
 export const getPlaylistById = (id) => api.get(`/playlist/${id}`)
+export const updatePlaylistById = (id, payload) => api.put(`/playlist/${id}`, payload)
 
 const apis = {
     getAllPlaylists,
     getPlaylistPairs,
     getPlaylistById,
+    updatePlaylistById
 }
 
 export default apis

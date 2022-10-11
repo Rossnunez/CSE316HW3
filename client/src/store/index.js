@@ -6,7 +6,36 @@ export const GlobalStoreContext = createContext({});
     This is our global data store. Note that it uses the Flux design pattern,
     which makes use of things like actions and reducers. 
     
-    @author McKilla Gorilla
+    @author McKilla Gorilla ------------------> DATA STORE MAINTAINS STATES OF THE APPLICATION
+    AWAIT -> 
+    API.FUNCTION(updatePlaylistById) THAT IS THE CLIENT SIDE API WHICH GENERATES MESSAGES TO SEND TO THE BKEND
+    Send a request over to the server and await wants the code to sit there and wait for a response it can only be used if the method youre calling returns something like a PROMISE 
+    PROMISE is a JS Object, if a function returns a promise we can AWAIT until its compoletely done(it will do it or tell you it failed)
+    AWAIT basically will wait for that response
+    WHEN YOU WANT TO SEND MESSAGES TO THE SERVER YOU HAVE TO WAIT, YOU DONT WANT THE CODE TO JUST GO
+    IN JS THERE ARE ASYNC FUNCTION MEANS DONT WAIT FOR ME
+    ASYNC means that code can be run in a seperate thread while the code keeps going
+    the only time we call await to send a http req to the server
+    the reason we call await in async function is so you can wait on another thread and not the main thread
+    *this is **FLUX ARCHIECTURE** USED FOR UI LIBRARIES
+    REDUCER IS AN ABSTRACT STATE UPDATE, it just returns a new state and you use that to update the state
+    useCONtext allows the store to be shared with all react components
+    Hooks let us avoid using lifecycle functions
+    useState allows use to create a state? maybe idk
+    use in the frontend is a hook function
+    Reducer is purely functional prog, you give it an intial state and action and it will produce a new state, and abstract of updating the state
+    reducer is usually called by a dispatch method
+    reducer is good to know and used in many apis
+    redux api would define reducer
+    there is a useReducer hook, were not using useReducer 
+    useEffect(another hook function)    
+    ROUTER BACKEND IS REALLY MIDDLEWEAR AND the router deciders if a function is like thst send it so the handler
+    FRONT END ROUTER IS ABOUT SELECTING WHICH REACT COMPONENETS SHOULD BE USED
+    2 ways to get to ROUTE
+    1. we might have a link, react router link(link object or dynamic link)
+    2. GET THE useHistory HOOK, AND PUSH YOU TO ANOTHER LIKE(YOU WILL SEE IT DONE THIS WAY)
+    run the program comment out that line see what happens, uncomment and see what happens youll see a difference 
+    
 */
 
 // THESE ARE ALL THE TYPES OF UPDATES TO OUR GLOBAL
@@ -116,7 +145,8 @@ export const useGlobalStore = () => {
         async function asyncChangeListName(id) {
             let response = await api.getPlaylistById(id);
             if (response.data.success) {
-                let playlist = response.data.playist;
+                let playlist = response.data.playlist; //bruh playlist was spelled wrong
+                //console.log(playlist);
                 playlist.name = newName;
                 async function updateList(playlist) {
                     response = await api.updatePlaylistById(playlist._id, playlist);
@@ -186,7 +216,7 @@ export const useGlobalStore = () => {
         }
         asyncSetCurrentList(id);
     }
-    store.getPlaylistSize = function() {
+    store.getPlaylistSize = function () {
         return store.currentList.songs.length;
     }
     store.undo = function () {
