@@ -1,6 +1,7 @@
-import { createContext, useState } from 'react'
+import { createContext, StrictMode, useState } from 'react'
 import jsTPS from '../common/jsTPS'
 import api from '../api'
+import MoveSong_Transaction from '../transactions/MoveSong_Transaction'
 export const GlobalStoreContext = createContext({});
 /*
     This is our global data store. Note that it uses the Flux design pattern,
@@ -212,12 +213,10 @@ export const useGlobalStore = () => {
         let modal = document.getElementById("delete-modal");
         modal.classList.add("is-visible");
     }
-
     store.hideDeleteListModal = function () {
         let modal = document.getElementById("delete-modal");
         modal.classList.remove("is-visible");
     }
-
     store.markListForDeletion = function (id) {
         async function asyncSetDeleteList(id) {
             let response = await api.getPlaylistById(id);
@@ -237,10 +236,31 @@ export const useGlobalStore = () => {
         }
         asyncSetDeleteList(id);
     }
-
     store.deleteMarkedList = function () {
         store.deleteCurrentList(store.listMarkedForDeletion);
         store.hideDeleteListModal();
+    }
+    //---------------------------------->END OF ALL DELETE LIST FUNCTIONS
+
+    //THIS FUNCTION IS THE TRANSACTION FOR DRAG AND DROP OF SONG CARDS
+    store.addMoveSongTransaction = function (start, end) {
+        let transaction = new MoveSong_Transaction(store, start, end);
+        tps.addTransaction(transaction);
+    }
+
+    store.moveSong = function (start, end) {
+        let list = store.currentList;
+        
+        let temp = list.songs[start];
+        list.songs[start] = list.songs[end];
+        list.songs[end] = temp;
+
+        store.currentList = list
+        storeReducer({
+            type: GlobalStoreActionType.SET_CURRENT_LIST,
+            payload: store.currentList
+        });
+        store.history.push("/playlist/" + store.currentList._id);
     }
 
     //THIS FUNCTION DELETES THE CURRENT LIST
@@ -277,7 +297,6 @@ export const useGlobalStore = () => {
         }
         asyncAddSong();
     }
-
     // THIS FUNCTION PROCESSES CLOSING THE CURRENTLY LOADED LIST
     store.closeCurrentList = function () {
         storeReducer({
