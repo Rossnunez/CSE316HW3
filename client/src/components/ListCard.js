@@ -10,8 +10,8 @@ import { GlobalStoreContext } from '../store'
 */
 function ListCard(props) {
     const { store } = useContext(GlobalStoreContext);
-    const [ editActive, setEditActive ] = useState(false);
-    const [ text, setText ] = useState("");
+    const [editActive, setEditActive] = useState(false);
+    const [text, setText] = useState("");
     store.history = useHistory();
     const { idNamePair, selected } = props;
 
@@ -31,6 +31,14 @@ function ListCard(props) {
         toggleEdit();
     }
 
+    function handleDeleteList(event) {
+        event.stopPropagation();
+        let _id = event.target.id;
+        const myArray = _id.split("-");
+        let word = myArray[2];
+        store.markListForDeletion(word);
+    }
+
     function toggleEdit() {
         let newActive = !editActive;
         if (newActive) {
@@ -47,7 +55,7 @@ function ListCard(props) {
         }
     }
     function handleUpdateText(event) {
-        setText(event.target.value );
+        setText(event.target.value);
     }
 
     let selectClass = "unselected-list-card";
@@ -75,6 +83,7 @@ function ListCard(props) {
                 type="button"
                 id={"delete-list-" + idNamePair._id}
                 className="list-card-button"
+                onClick={handleDeleteList}
                 value={"\u2715"}
             />
             <input

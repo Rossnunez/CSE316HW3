@@ -9,12 +9,10 @@
     
     @author McKilla Gorilla
 */
-
 import axios from 'axios'
 const api = axios.create({
     baseURL: 'http://localhost:4000/api',
 })
-
 // THESE ARE ALL THE REQUESTS WE'LL BE MAKING, ALL REQUESTS HAVE A
 // REQUEST METHOD (like get) AND PATH (like /playlist). SOME ALSO
 // REQUIRE AN id SO THAT THE SERVER KNOWS ON WHICH LIST TO DO ITS
@@ -34,12 +32,19 @@ export const getAllPlaylists = () => api.get(`/playlists`)
 export const getPlaylistPairs = () => api.get('playlistpairs')
 export const getPlaylistById = (id) => api.get(`/playlist/${id}`)
 export const updatePlaylistById = (id, payload) => api.put(`/playlist/${id}`, payload)
+export const createPlaylist = (payload) => api.post(`/playlist`, payload)
+export const deletePlaylistById = (id) => api.delete(`/playlist/${id}`)
+export const addSongById = (id, song) => api.put(`/playlist/${id}`, song)
+// add new song
 
 const apis = {
     getAllPlaylists,
     getPlaylistPairs,
     getPlaylistById,
-    updatePlaylistById
+    updatePlaylistById,
+    createPlaylist,
+    deletePlaylistById,
+    addSongById
 }
 
 export default apis
