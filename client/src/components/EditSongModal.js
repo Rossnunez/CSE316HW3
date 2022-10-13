@@ -42,56 +42,47 @@ function EditSongModal() {
                     <div className="modal-center-content">
                         <div style={{ paddingBottom: '10px' }}>
                             <label
-                                //className='modal-footer'
                                 style={{ float: 'left', fontSize: '25pt', fontWeight: 'bold' }} //"float: left; font-size: 25pt; font-weight: bold;" 
                                 htmlFor="Title">Title:
                             </label>
                             <input
                                 style={{ fontSize: '15pt', margin: '0px', float: 'right' }}//"font-size: 15pt; margin:0px; float: right;"
-                                //className='song-card'
                                 type='text'
                                 id="Title"
                                 name="Title"
                                 defaultValue={title}
-                            //onChange={e => this.changeTitle(e.target.value)}
                             />
                         </div>
                         <br />
                         <br />
                         <div style={{ paddingBottom: '10px' }}>
                             <label
-                                //className='modal-footer'
                                 style={{ float: 'left', fontSize: '25pt', fontWeight: 'bold' }} //"float: left; font-size: 25pt; font-weight: bold;" 
                                 htmlFor="Artist">
                                 Artist:
                             </label>
                             <input
                                 style={{ fontSize: '15pt', margin: '0px', float: 'right' }} //"font-size: 15pt; margin:0px; float: right;" 
-                                //className='song-card'
                                 type='text'
                                 id="Artist"
                                 name="Artist"
                                 defaultValue={artist}
-                            //onChange={e => this.changeArtist(e.target.value)}
                             />
                         </div >
                         <br />
                         <br />
                         <div style={{ paddingBottom: '10px' }}>
                             <label
-                                //className='modal-footer'
                                 style={{ float: 'left', fontSize: '25pt', fontWeight: 'bold' }}//"float: left; font-size: 25pt; font-weight: bold;" 
                                 htmlFor="Id">
                                 YoutubeId:
                             </label>
                             <input
                                 style={{ fontSize: '15pt', margin: '0px', float: 'right' }} //"font-size: 15pt; margin:0px; float: right;" 
-                                //className='song-card'
                                 type='text'
                                 id="Id"
                                 name="Id"
                                 defaultValue={id}
-                            //onChange={e => this.changeYTID(e.target.value)}
                             />
                         </div>
                         <br />

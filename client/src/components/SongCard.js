@@ -49,6 +49,16 @@ function SongCard(props) {
         store.addMoveSongTransaction(src, tgt);
     }
 
+    function handleDeleteSong(event) {
+        event.stopPropagation();
+        let target = event.target;
+        let targetId = target.id;
+        targetId = targetId.substring(target.id.indexOf("-") + 1);
+        const arrSRC = targetId.split("-");
+        let index = arrSRC[1];
+        store.markSongForDelete(song, index)
+    }
+
     let cardClass = "list-card unselected-list-card";
     if (draggedTo) {
         cardClass = "list-card selected-list-card";
@@ -79,6 +89,7 @@ function SongCard(props) {
                 id={"remove-song-" + index}
                 className="list-card-button"
                 value={"\u2715"}
+                onClick={handleDeleteSong}
             />
         </div>
     );

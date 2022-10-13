@@ -252,14 +252,63 @@ export const useGlobalStore = () => {
         let newArtist = document.getElementById("Artist").value
         let newYouTubeId = document.getElementById("Id").value
         store.currentList.songs.splice(store.indexOfSong, 1, { "title": newTitle, "artist": newArtist, "youTubeId": newYouTubeId })
-        storeReducer({
-            type: GlobalStoreActionType.SET_CURRENT_LIST,
-            payload: store.currentList
-        });
-        store.history.push("/playlist/" + store.currentList._id);
+
+        let list = store.currentList
+        async function updateList2(list) {
+            let response = await api.updatePlaylistById(list._id, list);
+            if (response.data.success) {
+                storeReducer({
+                    type: GlobalStoreActionType.SET_CURRENT_LIST,
+                    payload: list
+                });
+                store.history.push("/playlist/" + list._id);
+            }
+        }
+        updateList2(list);
         store.hideEditSongModal();
     }
     //---------------------------------------------->
+
+    //THESE FUNCTIONS ARE FOR DELETING A SONG WITH THE DELETE-SONG MODAL INCLUDED
+    store.markSongForDelete = function (song, index) {
+        storeReducer({
+            type: GlobalStoreActionType.MARK_SONG_FOR_EDIT,
+            payload: song,
+            index: index
+        });
+        store.showDeleteSongModal();
+    }
+    store.showDeleteSongModal = function () {
+        let modal = document.getElementById("delete-song-modal");
+        modal.classList.add("is-visible");
+    }
+    store.hideDeleteSongModal = function () {
+        let modal = document.getElementById("delete-song-modal");
+        modal.classList.remove("is-visible");
+    }
+
+    store.deleteMarkedSong = function () {
+        console.log("Index below is")
+        console.log(store.indexOfSong)
+        console.log("Before Splicing below")
+        console.log(store.currentList.songs)
+        store.currentList.songs.splice(store.indexOfSong, 1)
+        console.log("After splicing")
+        console.log(store.currentList.songs)
+        let list = store.currentList
+        async function updateList3(list) {
+            let response = await api.updatePlaylistById(list._id, list);
+            if (response.data.success) {
+                storeReducer({
+                    type: GlobalStoreActionType.SET_CURRENT_LIST,
+                    payload: list
+                });
+                store.history.push("/playlist/" + list._id);
+            }
+        }
+        updateList3(list);
+        store.hideDeleteSongModal();
+    }
 
     //THESE FUNCTIONS ARE FOR DELETING A LIST WITH THE DELETE MODAL INCLUDED
     store.showDeleteListModal = function () {
