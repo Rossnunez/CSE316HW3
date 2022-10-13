@@ -2,6 +2,7 @@ import { createContext, StrictMode, useState } from 'react'
 import jsTPS from '../common/jsTPS'
 import api from '../api'
 import MoveSong_Transaction from '../transactions/MoveSong_Transaction'
+import AddSong_Transaction from '../transactions/AddSong_Transaction';
 export const GlobalStoreContext = createContext({});
 /*
     This is our global data store. Note that it uses the Flux design pattern,
@@ -246,7 +247,6 @@ export const useGlobalStore = () => {
         let modal = document.getElementById("edit-song-modal");
         modal.classList.remove("is-visible");
     }
-
     store.editMarkedSong = function () {
         let newTitle = document.getElementById("Title").value
         let newArtist = document.getElementById("Artist").value
@@ -286,7 +286,6 @@ export const useGlobalStore = () => {
         let modal = document.getElementById("delete-song-modal");
         modal.classList.remove("is-visible");
     }
-
     store.deleteMarkedSong = function () {
         console.log("Index below is")
         console.log(store.indexOfSong)
@@ -309,6 +308,7 @@ export const useGlobalStore = () => {
         updateList3(list);
         store.hideDeleteSongModal();
     }
+    //---------------------------------------->END OF ALL DELETE SONG FUNCTIONS 
 
     //THESE FUNCTIONS ARE FOR DELETING A LIST WITH THE DELETE MODAL INCLUDED
     store.showDeleteListModal = function () {
@@ -340,6 +340,46 @@ export const useGlobalStore = () => {
         store.hideDeleteListModal();
     }
     //---------------------------------->END OF ALL DELETE LIST FUNCTIONS
+
+    //THIS FUNCTION IS THE TRANSACTION FOR ADDING SONGS TO CURRENT LIST
+    store.addSongTransaction = function () {
+        let transaction = new AddSong_Transaction(store);
+        tps.addTransaction(transaction);
+    }
+    //THIS FUNCTION ADDS SONG TO CURRENT PLAYLIST
+    store.addSongToCurrentList = function () {
+        async function asyncAddSong() {
+            let id = store.currentList._id;
+            let song = { "title": "Untitled", "artist": "Unknown", "youTubeId": "dQw4w9WgXcQ" };
+            store.currentList.songs.push({ "title": "Untitled", "artist": "Unknown", "youTubeId": "dQw4w9WgXcQ" });
+            let response = await api.addSongById(id, store.currentList);
+            if (response.data.success) {
+                storeReducer({
+                    type: GlobalStoreActionType.SET_CURRENT_LIST,
+                    payload: store.currentList
+                });
+                store.history.push("/playlist/" + id);
+            }
+        }
+        asyncAddSong();
+    }
+
+    store.deleteLastSong = function () {
+        async function asyncRemoveSong() {
+            let id = store.currentList._id;
+            store.currentList.songs.pop()
+            let response = await api.addSongById(id, store.currentList);
+            if (response.data.success) {
+                storeReducer({
+                    type: GlobalStoreActionType.SET_CURRENT_LIST,
+                    payload: store.currentList
+                });
+                store.history.push("/playlist/" + id);
+            }
+        }
+        asyncRemoveSong();
+    }
+    //---------------------------------->END OF ALL ADD SONG CARDS TRANSACTIONS
 
     //THIS FUNCTION IS THE TRANSACTION FOR DRAG AND DROP OF SONG CARDS
     store.addMoveSongTransaction = function (start, end) {
@@ -379,23 +419,7 @@ export const useGlobalStore = () => {
         }
         processDelete(id);
     }
-    //THIS FUNCTION ADDS SONG TO CURRENT PLAYLIST
-    store.addSongToCurrentList = function () {
-        async function asyncAddSong() {
-            let id = store.currentList._id;
-            let song = { "title": "Untitled", "artist": "Unknown", "youTubeId": "dQw4w9WgXcQ" };
-            store.currentList.songs.push({ "title": "Untitled", "artist": "Unknown", "youTubeId": "dQw4w9WgXcQ" });
-            let response = await api.addSongById(id, store.currentList);
-            if (response.data.success) {
-                storeReducer({
-                    type: GlobalStoreActionType.SET_CURRENT_LIST,
-                    payload: store.currentList
-                });
-                store.history.push("/playlist/" + id);
-            }
-        }
-        asyncAddSong();
-    }
+
     // THIS FUNCTION PROCESSES CLOSING THE CURRENTLY LOADED LIST
     store.closeCurrentList = function () {
         storeReducer({
