@@ -21,8 +21,7 @@ function EditSongModal() {
     }
 
     function handleEditSong(event) {
-        event.stopPropagation();
-        store.editMarkedSong();
+        store.editSongTransaction();
     }
     function handleCloseModal(event) {
         event.stopPropagation();
