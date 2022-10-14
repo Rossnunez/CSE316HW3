@@ -9,10 +9,16 @@ export default class MoveSong_Transaction extends jsTPS_Transaction {
     }
 
     doTransaction() {
-        this.store.moveSong(this.oldItemIndex, this.newItemIndex);
+        let song = this.store.currentList.songs[this.oldItemIndex];
+        this.store.currentList.songs.splice(this.oldItemIndex, 1)
+        this.store.currentList.songs.splice(this.newItemIndex, 0, song)
+        this.store.updatePlaylist(this.store.currentList)
     }
 
     undoTransaction() {
-        this.store.moveSong(this.newItemIndex, this.oldItemIndex);
+        let song = this.store.currentList.songs[this.newItemIndex];
+        this.store.currentList.songs.splice(this.newItemIndex, 1)
+        this.store.currentList.songs.splice(this.oldItemIndex, 0, song)
+        this.store.updatePlaylist(this.store.currentList)
     }
 }

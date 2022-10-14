@@ -480,6 +480,19 @@ export const useGlobalStore = () => {
         });
         store.history.push("/playlist/" + store.currentList._id);
     }
+    store.updatePlaylist = function (list) {
+        async function updateList6(list) {
+            let response = await api.updatePlaylistById(list._id, list);
+            if (response.data.success) {
+                storeReducer({
+                    type: GlobalStoreActionType.SET_CURRENT_LIST,
+                    payload: list
+                });
+                store.history.push("/playlist/" + list._id);
+            }
+        }
+        updateList6(list);
+    }
     //-------------------------------------->END OF ALL DRAG AND DROP SONG CARDS TRANSACTIONS
 
     // THIS FUNCTION PROCESSES CLOSING THE CURRENTLY LOADED LIST
@@ -532,7 +545,6 @@ export const useGlobalStore = () => {
     store.redo = function () {
         tps.doTransaction();
     }
-
     store.check4Redo = function () {
         if (tps.hasTransactionToRedo()) {
             // storeReducer({

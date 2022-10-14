@@ -23,7 +23,6 @@ function EditToolbar() {
         history.push("/");
         store.closeCurrentList();
     }
-
     function handleAddSong() {
         store.addSongTransaction();
     }
@@ -40,7 +39,6 @@ function EditToolbar() {
 
     store.check4Undo();
     store.check4Redo();
-    console.log(store.boolRedo)
     if (!store.boolUndo) {
         undoStatus = true;
     }
