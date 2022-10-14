@@ -23,21 +23,48 @@ function EditToolbar() {
         history.push("/");
         store.closeCurrentList();
     }
-    
-    function handleAddSong(){
+
+    function handleAddSong() {
         store.addSongTransaction();
     }
 
-    let editStatus = false;
-    if (store.isListNameEditActive) {
-        editStatus = true;
+
+    let undoStatus = false;
+    let redoStatus = false;
+    let songStatus = false;
+    if (store.listNameActive) {
+        undoStatus = true;
+        redoStatus = true;
+        songStatus = true;
+    }
+
+    store.check4Undo();
+    store.check4Redo();
+    console.log(store.boolRedo)
+    if (!store.boolUndo) {
+        undoStatus = true;
+    }
+    if (!store.boolRedo) {
+        redoStatus = true;
+    }
+
+    if (!store.currentList) {
+        undoStatus = true;
+        redoStatus = true;
+        songStatus = true;
+    }
+
+    if (store.modalOpen) {
+        undoStatus = true;
+        redoStatus = true;
+        songStatus = true;
     }
     return (
         <span id="edit-toolbar">
             <input
                 type="button"
                 id='add-song-button'
-                disabled={editStatus}
+                disabled={songStatus}
                 value="+"
                 className={enabledButtonClass}
                 onClick={handleAddSong}
@@ -45,7 +72,7 @@ function EditToolbar() {
             <input
                 type="button"
                 id='undo-button'
-                disabled={editStatus}
+                disabled={undoStatus}
                 value="⟲"
                 className={enabledButtonClass}
                 onClick={handleUndo}
@@ -53,7 +80,7 @@ function EditToolbar() {
             <input
                 type="button"
                 id='redo-button'
-                disabled={editStatus}
+                disabled={redoStatus}
                 value="⟳"
                 className={enabledButtonClass}
                 onClick={handleRedo}
@@ -61,7 +88,7 @@ function EditToolbar() {
             <input
                 type="button"
                 id='close-button'
-                disabled={editStatus}
+                disabled={songStatus}
                 value="&#x2715;"
                 className={enabledButtonClass}
                 onClick={handleClose}

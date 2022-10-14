@@ -51,7 +51,11 @@ export const GlobalStoreActionType = {
     LOAD_ID_NAME_PAIRS: "LOAD_ID_NAME_PAIRS",
     SET_CURRENT_LIST: "SET_CURRENT_LIST",
     SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE",
-    MARK_SONG_FOR_EDIT: "MARK_SONG_FOR_EDIT"
+    MARK_SONG_FOR_EDIT: "MARK_SONG_FOR_EDIT",
+    SET_BOOL_REDO: "SET_BOOL_REDO",
+    SET_BOOL_UNDO: "SET_BOOL_UNDO",
+    SET_MODAL_TRUE: "SET_MODAL_TRUE",
+    SET_MODAL_FALSE: "SET_MODAL_FALSE"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -69,7 +73,10 @@ export const useGlobalStore = () => {
         listMarkedForDeletion: null,
         nameOfDeletedList: null,
         songToEdit: null,
-        indexOfSong: null
+        indexOfSong: null,
+        boolUndo: null,
+        boolRedo: null,
+        modalOpen: null
     });
     // HERE'S THE DATA STORE'S REDUCER, IT MUST
     // HANDLE EVERY TYPE OF STATE CHANGE
@@ -140,7 +147,8 @@ export const useGlobalStore = () => {
                     listMarkedForDeletion: null,
                     nameOfDeletedList: null,
                     songToEdit: payload,
-                    indexOfSong: index
+                    indexOfSong: index,
+                    modalOpen: true
                 });
             }
             // UPDATE A LIST
@@ -163,6 +171,37 @@ export const useGlobalStore = () => {
                     listMarkedForDeletion: null
                 });
             }
+            // FOR SETTING UNDO AND REDO BOOLEAN VALUES
+            case GlobalStoreActionType.SET_BOOL_UNDO: {
+                return setStore({
+                    boolUndo: payload
+                });
+            }
+            case GlobalStoreActionType.SET_BOOL_REDO: {
+                return setStore({
+                    boolRedo: payload
+                });
+            }
+            case GlobalStoreActionType.SET_BOOL_REDO: {
+                return setStore({
+                    boolRedo: payload
+                });
+            }
+            case GlobalStoreActionType.SET_MODAL_FALSE: {
+                return setStore({
+                    idNamePairs: store.idNamePairs,
+                    currentList: store.currentList,
+                    newListCounter: store.newListCounter,
+                    listNameActive: false,
+                    listMarkedForDeletion: null,
+                    modalOpen: false
+                });
+            }
+            case GlobalStoreActionType.SET_MODAL_TRUE: {
+                return setStore({
+                    modalOpen: true
+                });
+            }
             default:
                 return store;
         }
@@ -177,7 +216,7 @@ export const useGlobalStore = () => {
         async function asyncChangeListName(id) {
             let response = await api.getPlaylistById(id);
             if (response.data.success) {
-                let playlist = response.data.playlist; 
+                let playlist = response.data.playlist;
                 playlist.name = newName;
                 async function updateList(playlist) {
                     response = await api.updatePlaylistById(playlist._id, playlist);
@@ -254,12 +293,16 @@ export const useGlobalStore = () => {
         store.showEditSongModal();
     }
     store.showEditSongModal = function () {
+        store.modalOpen = true;
         let modal = document.getElementById("edit-song-modal");
         modal.classList.add("is-visible");
     }
     store.hideEditSongModal = function () {
         let modal = document.getElementById("edit-song-modal");
         modal.classList.remove("is-visible");
+        storeReducer({
+            type: GlobalStoreActionType.SET_MODAL_FALSE
+        });
     }
     store.editSongTransaction = function () {
         let newTitle = document.getElementById("Title").value
@@ -286,12 +329,17 @@ export const useGlobalStore = () => {
         store.showDeleteSongModal();
     }
     store.showDeleteSongModal = function () {
+        store.modalOpen = true;
         let modal = document.getElementById("delete-song-modal");
         modal.classList.add("is-visible");
+
     }
     store.hideDeleteSongModal = function () {
         let modal = document.getElementById("delete-song-modal");
         modal.classList.remove("is-visible");
+        storeReducer({
+            type: GlobalStoreActionType.SET_MODAL_FALSE
+        });
     }
     store.deleteMarkedSong = function (index) {
         store.currentList.songs.splice(index, 1)
@@ -308,7 +356,7 @@ export const useGlobalStore = () => {
         }
         updateList3(list);
     }
-    store.addRemovedSong = function (song, index){
+    store.addRemovedSong = function (song, index) {
         store.currentList.songs.splice(index, 0, song)
         let list = store.currentList
         async function updateList4(list) {
@@ -334,10 +382,14 @@ export const useGlobalStore = () => {
     store.showDeleteListModal = function () {
         let modal = document.getElementById("delete-modal");
         modal.classList.add("is-visible");
+        store.modalOpen = true
     }
     store.hideDeleteListModal = function () {
         let modal = document.getElementById("delete-modal");
         modal.classList.remove("is-visible");
+        storeReducer({
+            type: GlobalStoreActionType.SET_MODAL_FALSE
+        });
     }
     store.markListForDeletion = function (id) {
         async function asyncSetDeleteList(id) {
@@ -479,6 +531,37 @@ export const useGlobalStore = () => {
     }
     store.redo = function () {
         tps.doTransaction();
+    }
+
+    store.check4Redo = function () {
+        if (tps.hasTransactionToRedo()) {
+            // storeReducer({
+            //     type: GlobalStoreActionType.SET_BOOL_REDO,
+            //     payload: true
+            // });
+            store.boolRedo = true
+        } else {
+            // storeReducer({
+            //     type: GlobalStoreActionType.SET_BOOL_REDO,
+            //     payload: false
+            // });
+            store.boolRedo = false
+        }
+    }
+    store.check4Undo = function () {
+        if (tps.hasTransactionToUndo()) {
+            // storeReducer({
+            //     type: GlobalStoreActionType.SET_BOOL_UNDO,
+            //     payload: true
+            // });
+            store.boolUndo = true
+        } else {
+            // storeReducer({
+            //     type: GlobalStoreActionType.SET_BOOL_REDO,
+            //     payload: false
+            // });
+            store.boolUndo = false
+        }
     }
     // THIS FUNCTION ENABLES THE PROCESS OF EDITING A LIST NAME
     store.setlistNameActive = function () {
