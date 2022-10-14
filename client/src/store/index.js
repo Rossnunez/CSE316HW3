@@ -55,7 +55,9 @@ export const GlobalStoreActionType = {
     SET_BOOL_REDO: "SET_BOOL_REDO",
     SET_BOOL_UNDO: "SET_BOOL_UNDO",
     SET_MODAL_TRUE: "SET_MODAL_TRUE",
-    SET_MODAL_FALSE: "SET_MODAL_FALSE"
+    SET_MODAL_FALSE: "SET_MODAL_FALSE",
+    SET_LAST_LIST: "SET_LAST_LIST",
+    DELETE_MARKED_LIST: "DELETE_MARKED_LIST"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -64,6 +66,7 @@ const tps = new jsTPS();
 // WITH THIS WE'RE MAKING OUR GLOBAL DATA STORE
 // AVAILABLE TO THE REST OF THE APPLICATION
 export const useGlobalStore = () => {
+    let lastList = null;
     // THESE ARE ALL THE THINGS OUR DATA STORE WILL MANAGE
     const [store, setStore] = useState({
         idNamePairs: [],
@@ -76,7 +79,8 @@ export const useGlobalStore = () => {
         indexOfSong: null,
         boolUndo: null,
         boolRedo: null,
-        modalOpen: null
+        modalOpen: null,
+        lastList: null
     });
     // HERE'S THE DATA STORE'S REDUCER, IT MUST
     // HANDLE EVERY TYPE OF STATE CHANGE
@@ -123,7 +127,8 @@ export const useGlobalStore = () => {
                     currentList: null,
                     newListCounter: store.newListCounter,
                     listNameActive: false,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    lastList: false
                 });
             }
             // PREPARE TO DELETE A LIST
@@ -137,6 +142,14 @@ export const useGlobalStore = () => {
                     nameOfDeletedList: payload.name
                 });
             }
+
+            //DELETE MARKED LIST 
+            case GlobalStoreActionType.DELETE_MARKED_LIST: {
+                return setStore({
+                    newListCounter: store.newListCounter - 1
+                });
+            }
+
             //PREPARE TO EDIT SONG
             case GlobalStoreActionType.MARK_SONG_FOR_EDIT: {
                 return setStore({
@@ -200,6 +213,11 @@ export const useGlobalStore = () => {
             case GlobalStoreActionType.SET_MODAL_TRUE: {
                 return setStore({
                     modalOpen: true
+                });
+            }
+            case GlobalStoreActionType.SET_LAST_LIST: {
+                return setStore({
+                    lastList: true
                 });
             }
             default:
@@ -417,6 +435,18 @@ export const useGlobalStore = () => {
             if (response.data.success) {
                 store.loadIdNamePairs();
                 store.history.push("/");
+                const response = await api.getPlaylistPairs();
+                if (response.data.success) {
+                    let pairsArray = response.data.idNamePairs;
+                    if (!pairsArray) {
+                        document.location.reload();
+                    }
+                }
+                //store.newListCounter -= 1;
+                //console.log(store.newListCounter)
+                // if (!store.newListCounter) {
+                //     document.location.reload();
+                // }
             }
         }
         processDelete(id);
@@ -508,10 +538,12 @@ export const useGlobalStore = () => {
             const response = await api.getPlaylistPairs();
             if (response.data.success) {
                 let pairsArray = response.data.idNamePairs;
-                storeReducer({
-                    type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
-                    payload: pairsArray
-                });
+                if (pairsArray) {
+                    storeReducer({
+                        type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
+                        payload: pairsArray
+                    });
+                }
             }
             else {
                 console.log("API FAILED TO GET THE LIST PAIRS");

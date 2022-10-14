@@ -29,8 +29,9 @@ body {
   height: 90%;
   top: 5%;
   display: grid;
-  grid-template-columns: 70% 30%;
-  grid-template-rows: 10% 80% 10%;
+  /* grid-template-columns: 70% 30%;
+  grid-template-rows: 10% 80% 10%; */
+  grid-template-rows: 20% 70% 10%;
 }
 
 #app-root {
@@ -75,6 +76,10 @@ body {
   background-color: var(--swatch-primary);
 }
 
+#playlist-cards {
+  display: inline list-item;
+}
+
 .playlister-button,
 .playlister-button-disabled {
   font-size: 36pt;
@@ -106,6 +111,7 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 36pt;
+  margin-top: 20px;
 }
 
 #add-list-button {
