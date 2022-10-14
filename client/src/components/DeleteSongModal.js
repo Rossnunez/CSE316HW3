@@ -18,7 +18,8 @@ function DeleteSongModal() {
     }
 
     function handleDeleteSong(event) {
-        store.deleteMarkedSong();
+        //store.deleteMarkedSong();
+        store.deleteSongTransaction();
     }
 
     function handleCloseModal(event) {

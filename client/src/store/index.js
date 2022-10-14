@@ -4,6 +4,7 @@ import api from '../api'
 import MoveSong_Transaction from '../transactions/MoveSong_Transaction'
 import AddSong_Transaction from '../transactions/AddSong_Transaction';
 import EditSong_Transaction from '../transactions/EditSong_Transaction';
+import DeleteSong_Transaction from '../transactions/DeleteSong_Transaction';
 export const GlobalStoreContext = createContext({});
 /*
     This is our global data store. Note that it uses the Flux design pattern,
@@ -70,7 +71,6 @@ export const useGlobalStore = () => {
         songToEdit: null,
         indexOfSong: null
     });
-
     // HERE'S THE DATA STORE'S REDUCER, IT MUST
     // HANDLE EVERY TYPE OF STATE CHANGE
     const storeReducer = (action) => {
@@ -169,7 +169,7 @@ export const useGlobalStore = () => {
     }
     // THESE ARE THE FUNCTIONS THAT WILL UPDATE OUR STORE AND
     // DRIVE THE STATE OF THE APPLICATION. WE'LL CALL THESE IN 
-    // RESPONSE TO EVENTS INSIDE OUR COMPONENTS.
+    // RESPONSE TO EVENTS INSIDE OUR COMPONENTS-------------------------------------------------->
 
     // THIS FUNCTION PROCESSES CHANGING A LIST NAME
     store.changeListName = function (id, newName) {
@@ -177,8 +177,7 @@ export const useGlobalStore = () => {
         async function asyncChangeListName(id) {
             let response = await api.getPlaylistById(id);
             if (response.data.success) {
-                let playlist = response.data.playlist; //bruh playlist was spelled wrong
-                //console.log(playlist);
+                let playlist = response.data.playlist; 
                 playlist.name = newName;
                 async function updateList(playlist) {
                     response = await api.updatePlaylistById(playlist._id, playlist);
@@ -204,7 +203,6 @@ export const useGlobalStore = () => {
         }
         asyncChangeListName(id);
     }
-
     //THIS FUNCTION PROCESSES CREATING A NEW LIST
     store.createNewList = function () {
         async function asyncCreateNewList() {
@@ -228,7 +226,7 @@ export const useGlobalStore = () => {
         asyncCreateNewList();
     }
 
-    //THESE FUNCTIONS ARE FOR EDITING A SONG WITH THE EDIT-SONG MODAL INCLUDED
+    //THESE FUNCTIONS ARE FOR EDITING A SONG WITH THE EDIT-SONG MODAL INCLUDED + TRANSACTIONS
     store.editSong = function (title, artist, id, index) {
         store.currentList.songs.splice(index, 1, { "title": title, "artist": artist, "youTubeId": id })
         let list = store.currentList
@@ -275,24 +273,10 @@ export const useGlobalStore = () => {
         let transaction = new EditSong_Transaction(store, oldTitle, oldArtist, oldYouTubeId, newTitle, newArtist, newYouTubeId, store.indexOfSong);
         tps.addTransaction(transaction);
         store.hideEditSongModal();
-        // store.currentList.songs.splice(store.indexOfSong, 1, { "title": newTitle, "artist": newArtist, "youTubeId": newYouTubeId })
-        // let list = store.currentList
-        // async function updateList2(list) {
-        //     let response = await api.updatePlaylistById(list._id, list);
-        //     if (response.data.success) {
-        //         storeReducer({
-        //             type: GlobalStoreActionType.SET_CURRENT_LIST,
-        //             payload: list
-        //         });
-        //         store.history.push("/playlist/" + list._id);
-        //     }
-        // }
-        // updateList2(list);
-        // store.hideEditSongModal();
     }
-    //---------------------------------------------->
+    //---------------------------------------------->END OF All EDIT SONG FUNCTIONS + TRANSACTIONS
 
-    //THESE FUNCTIONS ARE FOR DELETING A SONG WITH THE DELETE-SONG MODAL INCLUDED
+    //THESE FUNCTIONS ARE FOR DELETING A SONG WITH THE DELETE-SONG MODAL INCLUDED + TRANSACTIONS
     store.markSongForDelete = function (song, index) {
         storeReducer({
             type: GlobalStoreActionType.MARK_SONG_FOR_EDIT,
@@ -309,14 +293,8 @@ export const useGlobalStore = () => {
         let modal = document.getElementById("delete-song-modal");
         modal.classList.remove("is-visible");
     }
-    store.deleteMarkedSong = function () {
-        console.log("Index below is")
-        console.log(store.indexOfSong)
-        console.log("Before Splicing below")
-        console.log(store.currentList.songs)
-        store.currentList.songs.splice(store.indexOfSong, 1)
-        console.log("After splicing")
-        console.log(store.currentList.songs)
+    store.deleteMarkedSong = function (index) {
+        store.currentList.songs.splice(index, 1)
         let list = store.currentList
         async function updateList3(list) {
             let response = await api.updatePlaylistById(list._id, list);
@@ -329,9 +307,28 @@ export const useGlobalStore = () => {
             }
         }
         updateList3(list);
+    }
+    store.addRemovedSong = function (song, index){
+        store.currentList.songs.splice(index, 0, song)
+        let list = store.currentList
+        async function updateList4(list) {
+            let response = await api.updatePlaylistById(list._id, list);
+            if (response.data.success) {
+                storeReducer({
+                    type: GlobalStoreActionType.SET_CURRENT_LIST,
+                    payload: list
+                });
+                store.history.push("/playlist/" + list._id);
+            }
+        }
+        updateList4(list);
+    }
+    store.deleteSongTransaction = function () {
+        let transaction = new DeleteSong_Transaction(store, store.songToEdit, store.indexOfSong);
+        tps.addTransaction(transaction);
         store.hideDeleteSongModal();
     }
-    //---------------------------------------->END OF ALL DELETE SONG FUNCTIONS 
+    //------------------------------------------->END OF ALL DELETE SONG FUNCTIONS 
 
     //THESE FUNCTIONS ARE FOR DELETING A LIST WITH THE DELETE MODAL INCLUDED
     store.showDeleteListModal = function () {
@@ -359,13 +356,11 @@ export const useGlobalStore = () => {
         asyncSetDeleteList(id);
     }
     store.deleteMarkedList = function () {
-        store.deleteCurrentList(store.listMarkedForDeletion);
+        store.deleteList(store.listMarkedForDeletion);
         store.hideDeleteListModal();
     }
-    //THIS FUNCTION DELETES THE CURRENT LIST
-    store.deleteCurrentList = function (id) {
+    store.deleteList = function (id) {
         async function processDelete(id) {
-            console.log(id);
             let response = await api.deletePlaylistById(id);
             if (response.data.success) {
                 store.loadIdNamePairs();
@@ -374,14 +369,13 @@ export const useGlobalStore = () => {
         }
         processDelete(id);
     }
-    //---------------------------------->END OF ALL DELETE LIST FUNCTIONS
+    //---------------------------------------->END OF ALL DELETE LIST FUNCTIONS
 
-    //THIS FUNCTION IS THE TRANSACTION FOR ADDING SONGS TO CURRENT LIST
+    //THESE FUNCTIONS ARE FOR ADDING A SONG TO A LIST + TRANSACTIONS
     store.addSongTransaction = function () {
         let transaction = new AddSong_Transaction(store);
         tps.addTransaction(transaction);
     }
-    //THIS FUNCTION ADDS SONG TO CURRENT PLAYLIST
     store.addSongToCurrentList = function () {
         async function asyncAddSong() {
             let id = store.currentList._id;
@@ -413,9 +407,9 @@ export const useGlobalStore = () => {
         }
         asyncRemoveSong();
     }
-    //---------------------------------->END OF ALL ADD SONG CARDS TRANSACTIONS
+    //--------------------------------------->END OF ALL ADD SONG CARDS FUNCTIONS 
 
-    //THIS FUNCTION IS THE TRANSACTION FOR DRAG AND DROP OF SONG CARDS
+    //THESE FUNCTION ARE THE TRANSACTIONS FOR DRAG AND DROP OF SONG CARDS
     store.addMoveSongTransaction = function (start, end) {
         let transaction = new MoveSong_Transaction(store, start, end);
         tps.addTransaction(transaction);
@@ -434,9 +428,7 @@ export const useGlobalStore = () => {
         });
         store.history.push("/playlist/" + store.currentList._id);
     }
-    //---------------------------------->END OF ALL DRAG AND DROP SONG CARDS TRANSACTIONS
-
-
+    //-------------------------------------->END OF ALL DRAG AND DROP SONG CARDS TRANSACTIONS
 
     // THIS FUNCTION PROCESSES CLOSING THE CURRENTLY LOADED LIST
     store.closeCurrentList = function () {
@@ -462,7 +454,6 @@ export const useGlobalStore = () => {
         }
         asyncLoadIdNamePairs();
     }
-
     store.setCurrentList = function (id) {
         async function asyncSetCurrentList(id) {
             let response = await api.getPlaylistById(id);
@@ -480,7 +471,6 @@ export const useGlobalStore = () => {
         }
         asyncSetCurrentList(id);
     }
-
     store.getPlaylistSize = function () {
         return store.currentList.songs.length;
     }
@@ -490,7 +480,6 @@ export const useGlobalStore = () => {
     store.redo = function () {
         tps.doTransaction();
     }
-
     // THIS FUNCTION ENABLES THE PROCESS OF EDITING A LIST NAME
     store.setlistNameActive = function () {
         storeReducer({
