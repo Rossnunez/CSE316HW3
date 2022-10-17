@@ -42,6 +42,7 @@ export const GlobalStoreContext = createContext({});
     
 */
 
+
 // THESE ARE ALL THE TYPES OF UPDATES TO OUR GLOBAL
 // DATA STORE STATE THAT CAN BE PROCESSED
 export const GlobalStoreActionType = {
@@ -79,7 +80,7 @@ export const useGlobalStore = () => {
         indexOfSong: null,
         boolUndo: null,
         boolRedo: null,
-        modalOpen: null,
+        modalOpen: false,
         lastList: null
     });
     // HERE'S THE DATA STORE'S REDUCER, IT MUST
@@ -227,6 +228,17 @@ export const useGlobalStore = () => {
     // THESE ARE THE FUNCTIONS THAT WILL UPDATE OUR STORE AND
     // DRIVE THE STATE OF THE APPLICATION. WE'LL CALL THESE IN 
     // RESPONSE TO EVENTS INSIDE OUR COMPONENTS-------------------------------------------------->
+    function KeyPress(event) {
+        if (event.ctrlKey && !store.modalOpen) {
+            if (event.key === "z") {
+                store.undo();
+            }
+            else if (event.key === "y") {
+                store.redo();
+            }
+        }
+    }
+    document.onkeydown = (e) => KeyPress(e);
 
     // THIS FUNCTION PROCESSES CHANGING A LIST NAME
     store.changeListName = function (id, newName) {
@@ -282,7 +294,6 @@ export const useGlobalStore = () => {
         }
         asyncCreateNewList();
     }
-
     //THESE FUNCTIONS ARE FOR EDITING A SONG WITH THE EDIT-SONG MODAL INCLUDED + TRANSACTIONS
     store.editSong = function (title, artist, id, index) {
         store.currentList.songs.splice(index, 1, { "title": title, "artist": artist, "youTubeId": id })
@@ -527,6 +538,7 @@ export const useGlobalStore = () => {
 
     // THIS FUNCTION PROCESSES CLOSING THE CURRENTLY LOADED LIST
     store.closeCurrentList = function () {
+        tps.clearAllTransactions();
         storeReducer({
             type: GlobalStoreActionType.CLOSE_CURRENT_LIST,
             payload: {}
@@ -579,31 +591,15 @@ export const useGlobalStore = () => {
     }
     store.check4Redo = function () {
         if (tps.hasTransactionToRedo()) {
-            // storeReducer({
-            //     type: GlobalStoreActionType.SET_BOOL_REDO,
-            //     payload: true
-            // });
             store.boolRedo = true
         } else {
-            // storeReducer({
-            //     type: GlobalStoreActionType.SET_BOOL_REDO,
-            //     payload: false
-            // });
             store.boolRedo = false
         }
     }
     store.check4Undo = function () {
         if (tps.hasTransactionToUndo()) {
-            // storeReducer({
-            //     type: GlobalStoreActionType.SET_BOOL_UNDO,
-            //     payload: true
-            // });
             store.boolUndo = true
         } else {
-            // storeReducer({
-            //     type: GlobalStoreActionType.SET_BOOL_REDO,
-            //     payload: false
-            // });
             store.boolUndo = false
         }
     }
